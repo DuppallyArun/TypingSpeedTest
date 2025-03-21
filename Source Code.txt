@@ -1,0 +1,126 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class TypingSpeedTest extends JFrame 
+{
+    private JTextArea textArea; // To display the text
+    private JTextArea inputArea; // To accept user input
+    private JLabel timerLabel; // To show the countdown timer
+    private JLabel resultLabel; // To display results
+    private JButton startButton; // Start button
+    private Timer timer; // Timer object
+
+    private String testText = "Typing Speed Test application offers a straightforward and efficient way for users to evaluate their typing speed and accuracy. The user interface is clean and simple, focusing on essential features such as a countdown timer, input area, and result display. By enabling real-time feedback, it helps users track their progress and identify areas for improvement. The implementation is based on the Swing framework, which ensures compatibility across different platforms with minimal setup.\n" + //
+                "\n" + //
+                "While the application is functional as a basic typing test, there is significant room for future improvements. Adding a variety of test sentences, adjusting difficulty levels, and incorporating error detection could make the app more engaging and educational. Furthermore, saving high scores and offering personalized insights would add an element of challenge, motivating users to improve their performance over time.";
+    private int timeLeft = 60; // Time in seconds
+
+    public TypingSpeedTest() 
+    {
+        setTitle("Typing Speed Test");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+        
+
+        // Create components
+        textArea = new JTextArea(testText);
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setFont(new Font("Serif", Font.PLAIN, 20));
+
+        inputArea = new JTextArea();
+        inputArea.setEnabled(false); // Initially disabled
+        inputArea.setFont(new Font("Serif", Font.PLAIN, 20)); 
+
+        timerLabel = new JLabel("Time left: 60 seconds");
+        resultLabel = new JLabel("Results: ");
+        startButton = new JButton("Start Test");
+
+        // Add components to the frame
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(new JScrollPane(textArea), BorderLayout.CENTER);
+        topPanel.add(timerLabel, BorderLayout.SOUTH);
+
+        add(topPanel, BorderLayout.NORTH);
+        add(new JScrollPane(inputArea), BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout());
+        bottomPanel.add(startButton);
+        bottomPanel.add(resultLabel);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Add button listener
+        startButton.addActionListener(new ActionListener() 
+       {
+            @Override
+            public void actionPerformed(ActionEvent e) 
+            {
+                startTest();
+            }
+        });
+    }
+
+    private void startTest() 
+   {
+        inputArea.setEnabled(true);
+        inputArea.setText("");
+        inputArea.requestFocus();
+        timeLeft = 60;
+        timerLabel.setText("Time left: " + timeLeft + " seconds");
+        resultLabel.setText("Results: ");
+
+        // Start the timer
+        timer = new Timer(1000, new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) 
+            {
+                timeLeft--;
+                timerLabel.setText("Time left: " + timeLeft + " seconds");
+                if (timeLeft == 0) {
+                    timer.stop();
+                    endTest();
+                }
+            }
+        });
+        timer.start();
+    }
+
+    private void endTest() 
+    {
+        inputArea.setEnabled(false);
+
+        // Calculate results
+        String userInput = inputArea.getText().trim();
+        String[] wordsTyped = userInput.split("\\s+");
+        String[] correctWords = testText.split("\\s+");
+
+        int correctWordCount = 0;
+        for (int i = 0; i < Math.min(wordsTyped.length, correctWords.length); i++) 
+        {
+            if (wordsTyped[i].equals(correctWords[i])) 
+            {
+                correctWordCount++;
+            }
+        }
+
+        int speed = correctWordCount; // Words per minute (WPM)
+        int accuracy = (int) (((double) correctWordCount / correctWords.length) * 100);
+
+        resultLabel.setText("Results: WPM = " + speed + ", Accuracy = " + accuracy + "%");
+    }
+
+    public static void main(String[] args) 
+   {
+        SwingUtilities.invokeLater(() ->
+        {
+            TypingSpeedTest app = new TypingSpeedTest();
+            app.setVisible(true);
+        });
+    }
+}
